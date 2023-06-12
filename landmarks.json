@@ -1,0 +1,92 @@
+{
+    "landmarks": [
+        {
+            "name": "The Bug House",
+            "x": "-205",
+            "y": "64",
+            "z": "-265",
+            "description": "This is Sabrina and Matt's home island",
+            "img": ""
+        },
+        {
+            "name": "Sabrina and Matt's Island",
+            "x": "-169",
+            "y": "65",
+            "z": "-149",
+            "description": "This is Sabrina and Matt's home island",
+            "img": ""
+        },
+        {
+            "name": "Axolotl Place",
+            "x": "-104",
+            "y": "34",
+            "z": "-19",
+            "description": "You can find some axolotls here",
+            "img": ""
+        },
+        {
+            "name": "Zombie Spawner",
+            "x": "-1140",
+            "y": "5",
+            "z": "635",
+            "description": "A zombie spawner can be found here",
+            "img": ""
+        },
+        {
+            "name": "Central Nether Portal",
+            "x": "-111",
+            "y": "68",
+            "z": "-167",
+            "description": "This is the nether portal located in the center of the server village.",
+            "img": ""
+        },
+        {
+            "name": "The Catholic Church",
+            "x": "-216",
+            "y": "66",
+            "z": "-221",
+            "description": "This is the church of our lord and savior Jesus Christ",
+            "img": ""
+        },
+        {
+            "name": "Ocean?",
+            "x": "-1315",
+            "y": "63",
+            "z": "-130",
+            "description": "A really large body of water. Could be used for something.",
+            "img": ""
+        },
+        {
+            "name": "Ruined Nether Portal",
+            "x": "-1555",
+            "y": "65",
+            "z": "-290",
+            "description": "A broken nether portal that's been rebuilt. Near a field by the large body of water.",
+            "img": ""
+        },
+        {
+            "name": "Ruined Nether Portal (Nether)",
+            "x": "-203",
+            "y": "87",
+            "z": "-42",
+            "description": "A portal that spawned in a safe location in the nether. These coordinates are for the nether location",
+            "img": ""
+        },
+        {
+            "name": "Owen's Fent Shop",
+            "x": "-174",
+            "y": "48",
+            "z": "-251",
+            "description": "Owen's shop for selling fent. Warning: You may become addicted, use caution.",
+            "img": ""
+        },
+        {
+            "name": "Grassland Village",
+            "x": "60",
+            "y": "66",
+            "z": "-3495",
+            "description": "A village located in a grassland far away from spawn. Contains a cleric, leatherworker, and farmers.",
+            "img": ""
+        }
+    ]
+}

@@ -1,67 +1,92 @@
 {
     "landmarks": [
         {
-            "name": "Katebug and Iancheese's House",
-            "x": "-120",
-            "y": "71",
-            "z": "-15",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1117848884706824354/Minecraft_6_12_2023_12_11_16_PM.png"
-        },
-        {
-            "name": "Spawn",
-            "x": "-136",
-            "y": "67",
-            "z": "-15",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1117849266363314256/Minecraft_6_12_2023_12_13_08_PM.png"
-        },
-        {
-            "name": "Flower Field Village",
-            "x": "-342",
-            "y": "111",
+            "name": "The Bug House",
+            "x": "-205",
+            "y": "64",
             "z": "-265",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1117975325150814208/IMG_7052.PNG"
+            "description": "This is Sabrina and Matt's home island",
+            "img": ""
         },
         {
-            "name": "Plains Village",
-            "x": "93",
-            "y": "78",
-            "z": "-871",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1118010091912843274/Minecraft_6_12_2023_10_52_08_PM.png"
+            "name": "Sabrina and Matt's Island",
+            "x": "-169",
+            "y": "65",
+            "z": "-149",
+            "description": "This is Sabrina and Matt's home island",
+            "img": ""
         },
         {
-            "name": "Mega Taiga",
-            "x": "1594",
-            "y": "69",
-            "z": "-1974",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1118036183050616833/unnamed.png"
+            "name": "Axolotl Place",
+            "x": "-104",
+            "y": "34",
+            "z": "-19",
+            "description": "You can find some axolotls here",
+            "img": ""
+        },
+        {
+            "name": "Zombie Spawner",
+            "x": "-1140",
+            "y": "5",
+            "z": "635",
+            "description": "A zombie spawner can be found here",
+            "img": ""
+        },
+        {
+            "name": "Central Nether Portal",
+            "x": "-111",
+            "y": "68",
+            "z": "-167",
+            "description": "This is the nether portal located in the center of the server village.",
+            "img": ""
+        },
+        {
+            "name": "The Catholic Church",
+            "x": "-216",
+            "y": "66",
+            "z": "-221",
+            "description": "This is the church of our lord and savior Jesus Christ",
+            "img": ""
+        },
+        {
+            "name": "Ocean?",
+            "x": "-1315",
+            "y": "63",
+            "z": "-130",
+            "description": "A really large body of water. Could be used for something.",
+            "img": ""
         },
         {
             "name": "Ruined Nether Portal",
-            "x": "-1064",
-            "y": "69",
-            "z": "-284",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1118335799881113641/IMG_7061.png"
-        },
-        {
-            "name": "Jay's Cherry Garden",
-            "x": "-135",
-            "y": "72",
-            "z": "-60",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1118348607238721658/2023061321103900-11B64E28AD7A49CA9EC8AC007BE858C62.jpg"
-        },
-        {
-            "name": "The Docks",
-            "x": "-155",
+            "x": "-1555",
             "y": "65",
-            "z": "-20",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1118349976108535900/2023061220411900-11B64E28AD7A49CA9EC8AC007BE858C6.jpg"
+            "z": "-290",
+            "description": "A broken nether portal that's been rebuilt. Near a field by the large body of water.",
+            "img": ""
         },
         {
-            "name": "lush cave",
-            "x": "1644",
+            "name": "Ruined Nether Portal (Nether)",
+            "x": "-203",
+            "y": "87",
+            "z": "-42",
+            "description": "A portal that spawned in a safe location in the nether. These coordinates are for the nether location",
+            "img": ""
+        },
+        {
+            "name": "Owen's Fent Shop",
+            "x": "-174",
+            "y": "48",
+            "z": "-251",
+            "description": "Owen's shop for selling fent. Warning: You may become addicted, use caution.",
+            "img": ""
+        },
+        {
+            "name": "Grassland Village",
+            "x": "60",
             "y": "66",
-            "z": "-1991",
-            "img": "https://cdn.discordapp.com/ephemeral-attachments/1117848000086151210/1118398510669238313/140061ea7dd78e612606683c15a4bcaf.svg"
+            "z": "-3495",
+            "description": "A village located in a grassland far away from spawn. Contains a cleric, leatherworker, and farmers.",
+            "img": ""
         }
     ]
 }

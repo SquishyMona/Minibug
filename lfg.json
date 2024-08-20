@@ -1,0 +1,24 @@
+{
+    "lfg": [
+        {
+            "id": "db7ddd231c931ab056c5afab3865dacb",
+            "game": "Minecraft",
+            "description": "Looking to play with some people later, anyone is invited!",
+            "playercap": "9",
+            "players": [
+                284351113984081922
+            ],
+            "time": "9:00PM"
+        },
+        {
+            "id": "ffdb0c0a31ea149d311c5b62ba496c87",
+            "game": "Jackbox",
+            "description": "I want to play Jackbox later, all are welcome!",
+            "playercap": "10",
+            "players": [
+                284351113984081922
+            ],
+            "time": "9:00PM"
+        }
+    ]
+}

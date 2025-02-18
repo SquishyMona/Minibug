@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 
 from discord import SlashCommandGroup
 
+load_dotenv('./.env')
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
@@ -24,6 +25,7 @@ bot = discord.Bot()
 
 activelfg = {}
 EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
+print(EXAROTON_SERVER_ID)
 
 @bot.event
 async def on_ready():
@@ -420,8 +422,9 @@ server = bot.create_group(name="server", description="Commands for server manage
 
 @server.command(name="geyserupdate", guild_ids=[608476415825936394, 1117615350503190549])
 async def geyserupdate(ctx: discord.ApplicationContext):
+    await ctx.defer()
+    message = await ctx.followup.send("Checking server status...", wait=True)
     try:
-        await ctx.defer()
         headers = {"Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}"}
         response = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
         server = response.json()
@@ -429,33 +432,52 @@ async def geyserupdate(ctx: discord.ApplicationContext):
         status = server["data"]["status"]
         print("Checking server status...")
         print(status)
-        message = None
         while status != 0 and status != 1:
-            message = ctx.followup.send("Server is processing, waiting...", wait=True)
+            await message.edit(content="Server is processing, waiting...")
             print("Server is processing, waiting...")
             time.sleep(15)
             server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
             status = server.json()["data"]["status"]
-        if status == 1:
+        if status == 1:       
+            server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
+            onlineplayers = server.json()["data"]["players"]["count"]
+            
+            if onlineplayers != 0:
+                for i in range(1, 6):
+                    command = f"/say §cATTENTION: The server needs to perform an update and will stop in {6 - i} minutes. Please get to a safe spot and logout before this."
+                    commandreq = requests.post(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}/command", headers=headers, json={"command": command})
+                    print(commandreq.json())
+                    await message.edit(content=f"The server is currently online. The server will stop in {6 - i} minutes to give time for players to logout.")
+                    time.sleep(60)
+                    server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
+                    onlineplayers = server.json()["data"]["players"]["count"]
+                    if onlineplayers == 0:
+                        break
+
+            await message.edit(content="Server is online, stopping...")        
+            print("Server is online, stopping...")
             stopreq = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}/stop", headers=headers)
             time.sleep(10)
             server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
             status = server.json()["data"]["status"]
             while status != 0:
+                await message.edit(content="Server is still online, waiting...")
                 print("Server is still online, waiting...")
                 time.sleep(15)
                 server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
                 status = server.json()["data"]["status"]
 
+        await message.edit(content="Server is offline, downloading Geyser update file...")
         print("Server is offline, downloading Geyser update file")
         
         updateFile = requests.get("https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot")
         if updateFile.status_code != 200:
             print("Failed to download file")
-            await ctx.respond("Failed to download file! Please try again.")
+            await message.edit(content="Failed to download file! Please try again.")
             return
         
         print(updateFile.headers)
+        await message.edit(content="Downloaded file, uploading to server...")
         print("Downloaded file, uploading to server...")
         
         response = requests.put(
@@ -469,13 +491,13 @@ async def geyserupdate(ctx: discord.ApplicationContext):
         if response.status_code != 200:
             print(response.json())
             print("Failed to upload file")
-            await ctx.respond("Failed to upload file! Please try again.")
+            await message.edit(content="Failed to upload file! Please try again.")
             return
         print("File uploaded successfully")
-        await ctx.respond("Geyser updated!")
+        await message.edit(content="Geyser updated!")
     except Exception as e:
         print(e.with_traceback())
-        await ctx.respond("Something went wrong! Please try again.")
+        await message.edit(content="Something went wrong! Please try again.")
             
 
 
@@ -483,5 +505,4 @@ async def geyserupdate(ctx: discord.ApplicationContext):
 bot.add_application_command(profile)
 bot.add_application_command(landmarks)
 
-load_dotenv('./.env')
 bot.run(os.getenv("BOT_KEY"))

@@ -6,6 +6,9 @@ import discord
 import json
 import logging
 import wavelink
+import time
+import requests
+exa = Exaroton(os.getenv("EXAROTON_KEY"))
 import datetime
 from dotenv import load_dotenv
 
@@ -18,22 +21,23 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 bot = discord.Bot()
-queue = wavelink.Queue()
+#queue = wavelink.Queue()
 
 activelfg = {}
 
 @bot.event
 async def on_ready():
-    await connect_nodes()
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    #await connect_nodes()
 
-@bot.event
-async def on_wavelink_node_ready(node: wavelink.Node):
-    print(f"Wavelink node {node.id} ready!")
-
-async def connect_nodes():
-    await bot.wait_until_ready()
-    node = wavelink.Node(uri='narco.buses.rocks:2269', password='glasshost1984')
-    await wavelink.NodePool.connect(client=bot, nodes=[node])
+#@bot.event
+#async def on_wavelink_node_ready(node: wavelink.Node):
+#    print(f"Wavelink node {node.id} ready!")
+#
+#async def connect_nodes():
+#    await bot.wait_until_ready()
+#    node = wavelink.Node(uri='narco.buses.rocks:2269', password='glasshost1984')
+#    await wavelink.NodePool.connect(client=bot, nodes=[node])
 
 @bot.slash_command(name="ping", guild_ids=[608476415825936394, 1117615350503190549])
 async def ping(ctx):
@@ -412,8 +416,70 @@ async def create_lfg(ctx):
     modal = NewLFGModal(title="Create a new LFG post!")
     await ctx.send_modal(modal)
 
+server = bot.create_group(name="server", description="Commands for server management.")
+
+@server.command(name="geyserupdate", guild_ids=[608476415825936394, 1117615350503190549])
+async def geyserupdate(ctx):
+    try:
+        await ctx.defer()
+        headers = {"Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}"}
+        response = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+        server = response.json()
+        print(server)
+        status = server["data"]["status"]
+        print("Checking server status...")
+        print(status)
+        while status != 0 and status != 1:
+            print("Server is processing, waiting...")
+            time.sleep(15)
+            server = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+            status = server.json()["data"]["status"]
+        if status == 1:
+            stopreq = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw/stop", headers=headers)
+            time.sleep(10)
+            server = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+            status = server.json()["data"]["status"]
+            while status != 0:
+                print("Server is still online, waiting...")
+                time.sleep(15)
+                server = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+                status = server.json()["data"]["status"]
+
+        print("Server is offline, downloading Geyser update file")
+        
+        updateFile = requests.get("https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot")
+        if updateFile.status_code != 200:
+            print("Failed to download file")
+            await ctx.respond("Failed to download file! Please try again.")
+            return
+        
+        print(updateFile.headers)
+        print("Downloaded file, uploading to server...")
+        
+        response = requests.put(
+            "https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw/files/data/plugins/Geyser-Spigot.jar",
+            data=updateFile.content,
+            headers={
+                "Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}",
+                "Content-Type": "application/octet-stream"
+            }
+        )        
+        if response.status_code != 200:
+            print(response.json())
+            print("Failed to upload file")
+            await ctx.respond("Failed to upload file! Please try again.")
+            return
+        print("File uploaded successfully")
+        await ctx.respond("Geyser updated!")
+    except Exception as e:
+        print(e.with_traceback())
+        await ctx.respond("Something went wrong! Please try again.")
+            
+
+
 
 bot.add_application_command(profile)
 bot.add_application_command(landmarks)
 
+load_dotenv('./.env')
 bot.run(os.getenv("BOT_KEY"))

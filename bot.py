@@ -8,7 +8,6 @@ import logging
 import wavelink
 import time
 import requests
-exa = Exaroton(os.getenv("EXAROTON_KEY"))
 import datetime
 from dotenv import load_dotenv
 
@@ -24,6 +23,7 @@ bot = discord.Bot()
 #queue = wavelink.Queue()
 
 activelfg = {}
+EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
 
 @bot.event
 async def on_ready():
@@ -419,30 +419,32 @@ async def create_lfg(ctx):
 server = bot.create_group(name="server", description="Commands for server management.")
 
 @server.command(name="geyserupdate", guild_ids=[608476415825936394, 1117615350503190549])
-async def geyserupdate(ctx):
+async def geyserupdate(ctx: discord.ApplicationContext):
     try:
         await ctx.defer()
         headers = {"Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}"}
-        response = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+        response = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
         server = response.json()
         print(server)
         status = server["data"]["status"]
         print("Checking server status...")
         print(status)
+        message = None
         while status != 0 and status != 1:
+            message = ctx.followup.send("Server is processing, waiting...", wait=True)
             print("Server is processing, waiting...")
             time.sleep(15)
-            server = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+            server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
             status = server.json()["data"]["status"]
         if status == 1:
-            stopreq = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw/stop", headers=headers)
+            stopreq = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}/stop", headers=headers)
             time.sleep(10)
-            server = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+            server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
             status = server.json()["data"]["status"]
             while status != 0:
                 print("Server is still online, waiting...")
                 time.sleep(15)
-                server = requests.get("https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw", headers=headers)
+                server = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
                 status = server.json()["data"]["status"]
 
         print("Server is offline, downloading Geyser update file")
@@ -457,7 +459,7 @@ async def geyserupdate(ctx):
         print("Downloaded file, uploading to server...")
         
         response = requests.put(
-            "https://api.exaroton.com/v1/servers/PxzbjuGX0Bz4PtVw/files/data/plugins/Geyser-Spigot.jar",
+            f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}/files/data/plugins/Geyser-Spigot.jar",
             data=updateFile.content,
             headers={
                 "Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}",

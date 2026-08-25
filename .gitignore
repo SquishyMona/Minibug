@@ -2,3 +2,5 @@ env
 .env
 
 *.log
+
+launch.json

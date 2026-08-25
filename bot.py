@@ -21,27 +21,27 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 bot = discord.Bot()
-#queue = wavelink.Queue()
+queue = wavelink.Queue()
 
 activelfg = {}
-EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
-print(EXAROTON_SERVER_ID)
+#EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
+#print(EXAROTON_SERVER_ID)
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
-    #await connect_nodes()
+    await connect_nodes()
 
-#@bot.event
-#async def on_wavelink_node_ready(node: wavelink.Node):
-#    print(f"Wavelink node {node.id} ready!")
-#
-#async def connect_nodes():
-#    await bot.wait_until_ready()
-#    node = wavelink.Node(uri='narco.buses.rocks:2269', password='glasshost1984')
-#    await wavelink.NodePool.connect(client=bot, nodes=[node])
+@bot.event
+async def on_wavelink_node_ready(node: wavelink.Node):
+    print(f"Wavelink node ready!")
 
-@bot.slash_command(name="ping", guild_ids=[608476415825936394, 1117615350503190549])
+async def connect_nodes():
+    await bot.wait_until_ready()
+    node = wavelink.Node(uri='ws://lavalinkv4.serenetia.com:80', password="https://seretia.link/discord")
+    await wavelink.Pool.connect(client=bot, nodes=[node])
+
+@bot.slash_command(name="ping", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def ping(ctx):
     await ctx.respond("Pong!")
 
@@ -50,7 +50,7 @@ async def get_landmark_by_name(ctx: discord.AutocompleteContext):
         landmarks = json.load(f)
         return [landmark["name"] for landmark in landmarks["landmarks"]]
 
-@bot.slash_command(name="getlandmark", guild_ids=[608476415825936394, 1117615350503190549])
+@bot.slash_command(name="getlandmark", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def get_landmark(ctx, name: discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True)):
     try:
         with open("landmarks.json", "r") as f:
@@ -66,7 +66,7 @@ async def get_landmark(ctx, name: discord.Option(str, autocomplete=discord.utils
     except:
         await ctx.respond("Something went wrong! Please try again.")
 
-@bot.slash_command(name="directory", guild_ids=[608476415825936394, 1117615350503190549])
+@bot.slash_command(name="directory", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def directory(ctx):
     try:
         with open("landmarks.json", "r") as f:
@@ -80,34 +80,38 @@ async def directory(ctx):
 
 music = bot.create_group(name="music", description="Commands for playing music.")
 
-@music.command(name="play", guild_ids=[608476415825936394, 1117615350503190549])
+@music.command(name="play", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def play(ctx, songname: str):
+    await ctx.defer()
+    message = await ctx.followup.send("Searching for song...", wait=True)
+
     vc = ctx.voice_client
 
     if ctx.author.voice is None:
-        await ctx.respond("You must be in a voice channel!")
+        await message.edit("You must be in a voice channel!")
         return
 
     if not vc:
         vc = await ctx.author.voice.channel.connect(cls=wavelink.Player)
+        vc.autoplay = wavelink.AutoPlayMode.partial
     
     if ctx.author.voice.channel.id != vc.channel.id:
-        await ctx.respond("You have to be in the same voice channel as Minibug!")
+        await message.edit("You have to be in the same voice channel as Minibug!")
         return
     
-    song = await wavelink.YouTubeTrack.search(songname)
+    songs = await wavelink.Playable.search(songname)
 
-    if not song:
-        return await ctx.respond("We couldn't find a song with that name!")
+    if not songs:
+        return await message.edit("We couldn't find a song with that name!")
     
-    if queue.is_empty and not vc.is_playing():
-        await vc.play(song[0])
-        await ctx.respond(f"Playing {song[0].title}!")
+    if len(vc.queue._items) <= 0 and not vc.playing:
+        await vc.play(songs[0])
+        await message.edit(f"Playing {songs[0].title}!")
     else:
-        queue.put(song[0])
-        await ctx.respond(f"Added {song[0].title} to the queue!")
+        await vc.queue.put_wait(songs[0])
+        await message.edit(f"Added {songs[0].title} to the queue!")
 
-@music.command(name="stop", guild_ids=[608476415825936394, 1117615350503190549])
+@music.command(name="stop", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def stop(ctx):
     vc = ctx.voice_client
 
@@ -122,10 +126,10 @@ async def stop(ctx):
         return await ctx.respond("You have to be in the same voice channel as Minibug!")
     
     await vc.stop()
-    queue.clear()
+    vc.queue.clear()
     await ctx.respond("Stopped!")
 
-@music.command(name="pause", guild_ids=[608476415825936394, 1117615350503190549])
+@music.command(name="pause", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def pause(ctx):
     vc = ctx.voice_client
 
@@ -139,10 +143,10 @@ async def pause(ctx):
     if ctx.author.voice.channel.id != vc.channel.id:
         return await ctx.respond("You have to be in the same voice channel as Minibug!")
     
-    await vc.pause()
+    await vc.pause(not vc.paused)
     await ctx.respond("Paused!")
 
-@music.command(name="resume", guild_ids=[608476415825936394, 1117615350503190549])
+@music.command(name="resume", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def resume(ctx): 
     vc = ctx.voice_client
 
@@ -156,10 +160,10 @@ async def resume(ctx):
     if ctx.author.voice.channel.id != vc.channel.id:
         return await ctx.respond("You have to be in the same voice channel as Minibug!")
     
-    await vc.resume()
+    await vc.pause(not vc.paused)
     await ctx.respond("Resumed!")
 
-@music.command(name="skip", guild_ids=[608476415825936394, 1117615350503190549])
+@music.command(name="skip", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def skip(ctx):
     vc = ctx.voice_client
 
@@ -173,10 +177,10 @@ async def skip(ctx):
     if ctx.author.voice.channel.id != vc.channel.id:
         return await ctx.respond("You have to be in the same voice channel as Minibug!")
     
-    await vc.play(queue.get())
+    await vc.play(vc.queue.get())
     await ctx.respond("Skipped!")
 
-@music.command(name="viewqueue", guild_ids=[608476415825936394, 1117615350503190549])
+@music.command(name="viewqueue", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
 async def viewqueue(ctx):
     vc = ctx.voice_client
 
@@ -191,9 +195,32 @@ async def viewqueue(ctx):
         return await ctx.respond("You have to be in the same voice channel as Minibug!")
     
     embed = discord.Embed(title="Queue", description="Here are the songs in the queue.", color=0x00ff00)
-    for song in queue._queue:
-        embed.add_field(name=song.title, value=f"Duration: {song.duration}", inline=False)
+    for song in vc.queue._items:
+        embed.add_field(name=song.title, value=f"{song.author}", inline=False)
     await ctx.respond(embed=embed)
+
+@music.command(name="repeat", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+async def repeat(ctx, mode: discord.Option(str, "Choose a repeat mode.", choices=["Off", "Song", "All"], required=True)):
+    vc = ctx.voice_client
+
+    if ctx.author.voice is None:
+        await ctx.respond("You must be in a voice channel!")
+        return
+    
+    if not vc:
+        return await ctx.respond("Minibug is not in a voice channel!")
+    
+    if ctx.author.voice.channel.id != vc.channel.id:
+        return await ctx.respond("You have to be in the same voice channel as Minibug!")
+    
+    if mode == "Off":
+        vc.queue.mode = wavelink.QueueMode.normal
+    elif mode == "Song":
+        vc.queue.mode = wavelink.QueueMode.loop
+    elif mode == "All":
+        vc.queue.mode = wavelink.QueueMode.loop_all
+
+    await ctx.respond(f"Repeat mode set to {mode}!")
 
 profile = SlashCommandGroup("profile", "Commands relating to server profiles.")
 

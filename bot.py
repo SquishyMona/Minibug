@@ -78,6 +78,51 @@ async def directory(ctx):
     except:
         await ctx.respond("Something went wrong! Please try again.")
 
+role = bot.create_group(name="role", description="Commands for managing roles.")
+
+class RoleDropdownView(discord.ui.Select):
+    def __init__(self, ctx):
+        grantable = []
+        self.role_map = {}
+        try:
+            with open("roles.json", "r") as f:
+                roles = json.load(f)
+                for role in roles.get(str(ctx.guild.id)):
+                    grantable.append(discord.SelectOption(label=role.name, value=role.id))
+                    self.role_map[role.id] = role.name
+        except Exception as e:
+            print(e.with_traceback())
+            print("Error loading roles from roles.json")
+
+    async def role_callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await interaction.user.add_roles(*[interaction.guild.get_role(int(role_id)) for role_id in self.values])
+        await interaction.response.send_message("Roles granted!", ephemeral=True)
+
+class RoleSelectView(discord.ui.View):
+    def __init__(self, ctx):
+        super().__init__()
+        self.add_item(RoleDropdownView(ctx=ctx))
+
+@role.command(name="grant", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+async def grant(ctx):
+    view = RoleSelectView(ctx=ctx)
+    await ctx.respond("Select the roles you want to grant:", view=view, ephemeral=True)
+
+# @role.command(name="grant-add", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+# async def grant_add(ctx, role: discord.Option(discord.Role, "These roles will be grantable by all users", required=True)):
+#     try:
+#         with open("roles.json", "r+") as f:
+#             roles = json.load(f)
+#             if role.id in roles["roles"]:
+#                 await ctx.respond(f"{role.name} is already grantable!", ephemeral=True)
+#                 return
+#             roles["roles"].append(role.id)
+#             f.seek(0)
+#             json.dump(roles, f, indent=4)
+#             f.truncate()
+#             await ctx.respond(f"{role.name} is now grantable!", ephemeral=True)
+
 music = bot.create_group(name="music", description="Commands for playing music.")
 
 @music.command(name="play", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])

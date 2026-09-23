@@ -1,6 +1,9 @@
 env
-.env
+.venv
 
+.env
 *.log
 
 launch.json
+shell.nix
+.vscode

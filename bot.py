@@ -525,7 +525,30 @@ async def geyserupdate(ctx: discord.ApplicationContext):
     except Exception as e:
         print(e.with_traceback())
         await message.edit(content="Something went wrong! Please try again.")
-            
+
+# @profile.command(name="alt", guild_ids=[1540164753698332673])
+# async def alt(ctx, name: str, user: discord.Member, color: str = None):
+#     with open("profiles.json", "r+") as f:
+#         profiles = json.load(f)
+#         main = None
+#         alt = None
+#         for profile in profiles["profiles"]:
+#             if not main or not alt:
+#                 if profile["id"] == ctx.author.id:
+#                     main = profile
+#                 if profile["id"] == user.id:
+#                     alt = profile
+# 
+#         if not main:
+#             profiles["profiles"].append({"name": user.display_name, "id": ctx.author.id, "alt_id": user.id, "pronouns": "", "games": []})
+#         else:
+#             profiles["profiles"]
+#         newprofile = {"name": user.display_name, "id": user.id, "pronouns": "", "games": []}
+#         profiles["profiles"].append(newprofile)
+#         f.seek(0)
+#         json.dump(profiles, f, indent=4)
+#         f.truncate()
+#         await ctx.respond(f"Profile created for {user.display_name}!", ephemeral=True)
 
 
 

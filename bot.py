@@ -1,4 +1,10 @@
 import os
+
+# on startup in Spakred Host, all packages will be pip installed every time.
+# wavelink has discord.py as a dependency and will install it on startup.
+# doing this conflicts with pycord, so after all packages are installed, we
+# pip uninstall discord.py and pycord, then only install pycord, otherwise
+# things will break
 os.system("pip uninstall --yes discord.py py-cord")
 os.system("pip install --no-input py-cord")
 
@@ -38,7 +44,6 @@ bot = discord.Bot(intents=intents)
 queue = wavelink.Queue()
 
 activelfg = {}
-#print(EXAROTON_SERVER_ID)
 
 @bot.event
 async def on_ready():
@@ -103,7 +108,7 @@ async def get_landmark_by_name(ctx: discord.AutocompleteContext):
         return [landmark["name"] for landmark in landmarks["landmarks"]]
 
 @bot.slash_command(name="getlandmark", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
-async def get_landmark(ctx, name: discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True)):
+async def get_landmark(ctx, name: str = discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True)):
     try:
         with open("landmarks.json", "r") as f:
             landmarks = json.load(f)
@@ -252,7 +257,7 @@ async def viewqueue(ctx):
     await ctx.respond(embed=embed)
 
 @music.command(name="repeat", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
-async def repeat(ctx, mode: discord.Option(str, "Choose a repeat mode.", choices=["Off", "Song", "All"], required=True)):
+async def repeat(ctx, mode: str = discord.Option(str, "Choose a repeat mode.", choices=["Off", "Song", "All"], required=True)):
     vc = ctx.voice_client
 
     if ctx.author.voice is None:
@@ -311,7 +316,7 @@ async def view(ctx, user: discord.Member = None):
 edit = profile.create_subgroup(name="edit", description="Edit your profile.")
 
 @edit.command(name="pronouns", guild_ids=[608476415825936394, 1117615350503190549])
-async def pronouns(ctx, pronouns: discord.Option(str, "Add your pronouns to your profile.", required=True)):
+async def pronouns(ctx, pronouns: str = discord.Option(str, "Add your pronouns to your profile.", required=True)):
     with open("profiles.json", "r+") as f:
         profiles = json.load(f)
         for profile in profiles["profiles"]:
@@ -325,7 +330,7 @@ async def pronouns(ctx, pronouns: discord.Option(str, "Add your pronouns to your
         await ctx.respond("You don't have a profile! Use /view create to create one!")
 
 @edit.command(name="game", guild_ids=[608476415825936394, 1117615350503190549])
-async def games(ctx, game: discord.Option(str, "Add a game to your profile.", required=True)):
+async def games(ctx, game: str = discord.Option(str, "Add a game to your profile.", required=True)):
     with open("profiles.json", "r+") as f:
         profiles = json.load(f)
         for profile in profiles["profiles"]:
@@ -339,7 +344,7 @@ async def games(ctx, game: discord.Option(str, "Add a game to your profile.", re
         await ctx.respond("You don't have a profile! Use /view create to create one!")
 
 @edit.command(name="name", guild_ids=[608476415825936394, 1117615350503190549])
-async def name(ctx, name: discord.Option(str, "Edit your name on your profile.", required=True)):
+async def name(ctx, name: str = discord.Option(str, "Edit your name on your profile.", required=True)):
     with open("profiles.json", "r+") as f:
         profiles = json.load(f)
         for profile in profiles["profiles"]:
@@ -394,8 +399,8 @@ async def add_landmark(ctx):
 
 @landmarks.command(name="view", guild_ids=[608476415825936394, 1117615350503190549])
 async def get_landmark(ctx, 
-                       name: discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True),
-                       hide_response: discord.Option(bool, description="Hide the response message.", required=False)
+                       name: str = discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True),
+                       hide_response: str = discord.Option(bool, description="Hide the response message.", required=False)
                        ):
     try:
         with open("landmarks.json", "r") as f:
@@ -413,8 +418,8 @@ async def get_landmark(ctx,
 
 @landmarks.command(name="remove", guild_ids=[608476415825936394, 1117615350503190549])
 async def remove_landmark(ctx, 
-                          name: discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True),
-                          hide_response: discord.Option(bool, description="Hide the response message.", required=False)
+                          name: str = discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True),
+                          hide_response: str = discord.Option(bool, description="Hide the response message.", required=False)
                           ):
     with open("landmarks.json", "r+") as f:
         landmarks = json.load(f)

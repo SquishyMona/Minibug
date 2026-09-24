@@ -1,0 +1,9 @@
+python-dotenv 
+py-cord 
+python-dateutil 
+py-cord[voice] 
+pytz 
+wavelink 
+requests 
+openrouter 
+asyncio

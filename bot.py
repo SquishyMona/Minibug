@@ -8,7 +8,7 @@ import logging
 import wavelink
 import time
 import requests
-import datetime
+import asyncio
 from dotenv import load_dotenv
 from openrouter import OpenRouter
 
@@ -69,7 +69,8 @@ async def on_message(message: discord.Message):
 
     async with message.channel.typing():
         messages = await get_message_context(message)
-        response = openrouter.chat.send(
+        response = await asyncio.to_thread(
+            openrouter.chat.send,
             model=OPENROUTER_MODEL,
             messages=[
                 {"role": "system", "content": f"You are a helpful discord bot named {bot.user.name}."},

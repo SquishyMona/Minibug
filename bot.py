@@ -82,7 +82,10 @@ async def on_message(message: discord.Message):
             stream=False
         )
 
-        await message.channel.send(response.choices[0].message.content)
+        await message.reply(
+            response.choices[0].message.content,
+            allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=[message.author])
+        )
 
 
 async def connect_nodes():

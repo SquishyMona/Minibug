@@ -8,23 +8,36 @@ import logging
 import wavelink
 import time
 import requests
-import datetime
+import asyncio
 from dotenv import load_dotenv
-
+from openrouter import OpenRouter
 
 from discord import SlashCommandGroup
 
 load_dotenv('./.env')
+
+BOT_KEY = os.getenv("BOT_KEY")
+assert BOT_KEY is not None, "BOT_KEY is not set in the environment variables"
+
+EXAROTON_KEY = os.getenv("EXAROTON_KEY")
+EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
+
+OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL")
+openrouter = OPENROUTER_KEY and OpenRouter(api_key=OPENROUTER_KEY)
+
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
-bot = discord.Bot()
+
+intents = discord.Intents.default()
+intents.message_content = True
+bot = discord.Bot(intents=intents)
 queue = wavelink.Queue()
 
 activelfg = {}
-#EXAROTON_SERVER_ID = os.getenv("EXAROTON_SERVER_ID")
 #print(EXAROTON_SERVER_ID)
 
 @bot.event
@@ -35,6 +48,42 @@ async def on_ready():
 @bot.event
 async def on_wavelink_node_ready(node: wavelink.Node):
     print(f"Wavelink node ready!")
+
+async def get_message_context(message: discord.Message) -> list[dict[str, str]]:
+    result = []
+    if message.reference:
+        replied = await message.channel.fetch_message(message.reference.message_id)
+        result.extend(await get_message_context(replied))
+
+    # We want the newest message to be last in the context, since the model will read the messages in order.
+    result.append({ "role": "user", "content": f"<@{message.author.id}> {message.content}" })
+    return result
+
+@bot.event
+async def on_message(message: discord.Message):
+    if not openrouter or not OPENROUTER_MODEL or message.author.id == bot.user.id:
+        return
+
+    if not bot.user in message.mentions:
+        return
+
+    async with message.channel.typing():
+        messages = await get_message_context(message)
+        response = await asyncio.to_thread(
+            openrouter.chat.send,
+            model=OPENROUTER_MODEL,
+            messages=[
+                {"role": "system", "content": f"You are a helpful discord bot named {bot.user.name}."},
+                {"role": "system", "content": "You are tasked with assisting users in a helpful and friendly manner."},
+                {"role": "system", "content": "You are chatting in a Discord server. Each user message is prefixed with a mention tag like <@123456789> identifying who sent it."},
+                {"role": "system", "content": "Keep responses short and casual — a sentence or two is usually enough. Only give longer, more detailed answers when the question genuinely calls for it."},
+                *messages
+            ],
+            stream=False
+        )
+
+        await message.channel.send(response.choices[0].message.content)
+
 
 async def connect_nodes():
     await bot.wait_until_ready()
@@ -449,10 +498,14 @@ server = bot.create_group(name="server", description="Commands for server manage
 
 @server.command(name="geyserupdate", guild_ids=[608476415825936394, 1117615350503190549])
 async def geyserupdate(ctx: discord.ApplicationContext):
+    if not EXAROTON_KEY or not EXAROTON_SERVER_ID:
+        await ctx.respond("Exaroton is not configured. Set EXAROTON_KEY and EXAROTON_SERVER_ID in .env.", ephemeral=True)
+        return
+    
     await ctx.defer()
     message = await ctx.followup.send("Checking server status...", wait=True)
     try:
-        headers = {"Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}"}
+        headers = {"Authorization": f"Bearer {EXAROTON_KEY}"}
         response = requests.get(f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}", headers=headers)
         server = response.json()
         print(server)
@@ -511,7 +564,7 @@ async def geyserupdate(ctx: discord.ApplicationContext):
             f"https://api.exaroton.com/v1/servers/{EXAROTON_SERVER_ID}/files/data/plugins/Geyser-Spigot.jar",
             data=updateFile.content,
             headers={
-                "Authorization": f"Bearer {os.getenv('EXAROTON_KEY')}",
+                "Authorization": f"Bearer {EXAROTON_KEY}",
                 "Content-Type": "application/octet-stream"
             }
         )        
@@ -532,4 +585,4 @@ async def geyserupdate(ctx: discord.ApplicationContext):
 bot.add_application_command(profile)
 bot.add_application_command(landmarks)
 
-bot.run(os.getenv("BOT_KEY"))
+bot.run(BOT_KEY)

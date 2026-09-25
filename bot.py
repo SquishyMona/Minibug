@@ -91,7 +91,7 @@ async def on_message(message: discord.Message):
             allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=[message.author])
         )
 
-@bot.slash_command(name="ping", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+@bot.slash_command(name="ping")
 async def ping(ctx):
     await ctx.respond("Pong!")
 

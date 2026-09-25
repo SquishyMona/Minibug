@@ -13,7 +13,7 @@ class Landmark(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
         
-    @discord.slash_command(name="getlandmark", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @discord.slash_command(name="getlandmark")
     async def get_landmark(self, ctx, name: str = discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True)):
         try:
             with open("data/landmarks.json", "r") as f:
@@ -29,7 +29,7 @@ class Landmark(discord.Cog):
         except:
             await ctx.respond("Something went wrong! Please try again.")
 
-    @discord.slash_command(name="directory", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @discord.slash_command(name="directory")
     async def directory(self, ctx):
         try:
             with open("data/landmarks.json", "r") as f:
@@ -43,12 +43,12 @@ class Landmark(discord.Cog):
 
     landmarks = discord.SlashCommandGroup(name="landmarks", description="Commands for managing landmarks.")
 
-    @landmarks.command(name="add", guild_ids=[608476415825936394, 1117615350503190549])
+    @landmarks.command(name="add")
     async def add_landmark(self, ctx):
         modal = NewLandmarkModal(title="Add a new landmark!")
         await ctx.send_modal(modal)
 
-    @landmarks.command(name="view", guild_ids=[608476415825936394, 1117615350503190549])
+    @landmarks.command(name="view")
     async def get_landmark(self, ctx, 
                         name: str = discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True),
                         hide_response: str = discord.Option(bool, description="Hide the response message.", required=False)
@@ -67,7 +67,7 @@ class Landmark(discord.Cog):
         except:
             await ctx.respond("Something went wrong! Please try again.", ephemeral=True)
 
-    @landmarks.command(name="remove", guild_ids=[608476415825936394, 1117615350503190549])
+    @landmarks.command(name="remove")
     async def remove_landmark(self, ctx, 
                             name: str = discord.Option(str, autocomplete=discord.utils.basic_autocomplete(get_landmark_by_name), required=True),
                             hide_response: str = discord.Option(bool, description="Hide the response message.", required=False)

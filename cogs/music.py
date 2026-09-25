@@ -7,7 +7,7 @@ class Music(discord.Cog):
 
     music = discord.SlashCommandGroup(name="music", description="Commands for playing music.")
 
-    @music.command(name="play", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="play")
     async def play(self, ctx, songname: str):
         await ctx.defer()
         message = await ctx.followup.send("Searching for song...", wait=True)
@@ -38,7 +38,7 @@ class Music(discord.Cog):
             await vc.queue.put_wait(songs[0])
             await message.edit(f"Added {songs[0].title} to the queue!")
 
-    @music.command(name="stop", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="stop")
     async def stop(self, ctx):
         vc = ctx.voice_client
 
@@ -56,7 +56,7 @@ class Music(discord.Cog):
         vc.queue.clear()
         await ctx.respond("Stopped!")
 
-    @music.command(name="pause", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="pause")
     async def pause(self, ctx):
         vc = ctx.voice_client
 
@@ -73,7 +73,7 @@ class Music(discord.Cog):
         await vc.pause(not vc.paused)
         await ctx.respond("Paused!")
 
-    @music.command(name="resume", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="resume")
     async def resume(self, ctx): 
         vc = ctx.voice_client
 
@@ -90,7 +90,7 @@ class Music(discord.Cog):
         await vc.pause(not vc.paused)
         await ctx.respond("Resumed!")
 
-    @music.command(name="skip", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="skip")
     async def skip(self, ctx):
         vc = ctx.voice_client
 
@@ -107,7 +107,7 @@ class Music(discord.Cog):
         await vc.play(vc.queue.get())
         await ctx.respond("Skipped!")
 
-    @music.command(name="viewqueue", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="viewqueue")
     async def viewqueue(self, ctx):
         vc = ctx.voice_client
 
@@ -126,7 +126,7 @@ class Music(discord.Cog):
             embed.add_field(name=song.title, value=f"{song.author}", inline=False)
         await ctx.respond(embed=embed)
 
-    @music.command(name="repeat", guild_ids=[608476415825936394, 1117615350503190549, 1540164753698332673])
+    @music.command(name="repeat")
     async def repeat(self, ctx, mode: str = discord.Option(str, "Choose a repeat mode.", choices=["Off", "Song", "All"], required=True)):
         vc = ctx.voice_client
 

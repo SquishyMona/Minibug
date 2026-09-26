@@ -79,8 +79,9 @@ async def on_message(message: discord.Message):
             messages=[
                 {"role": "system", "content": f"You are a helpful discord bot named {bot.user.name}."},
                 {"role": "system", "content": "You are tasked with assisting users in a helpful and friendly manner."},
-                {"role": "system", "content": "You are chatting in a Discord server. Each user message is prefixed with a mention tag like <@123456789> identifying who sent it."},
+                {"role": "system", "content": "You are chatting in a Discord server. Each user message is prefixed with a mention tag like <@123456789> identifying who sent it. Do not include this mention tag in your response."},
                 {"role": "system", "content": "Keep responses short and casual — a sentence or two is usually enough. Only give longer, more detailed answers when the question genuinely calls for it."},
+                {"role": "system", "content": "Type your responses in lowercase unless the word is a proper noun, name, or acronym."},
                 *messages
             ],
             stream=False

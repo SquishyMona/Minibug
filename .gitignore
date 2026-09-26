@@ -7,3 +7,5 @@ env
 launch.json
 shell.nix
 .vscode
+
+__pycache__

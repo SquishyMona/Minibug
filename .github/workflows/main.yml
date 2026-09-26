@@ -18,11 +18,3 @@ jobs:
           remote_path: '/'
           sftp_only: true
           password: ${{ secrets.FTP_PASSWORD }}
-
-      - name: Send Restart Power Action
-        uses: outsparkled/pterodactyl-power-action@v0.1.0
-        with:
-          panel-url: 'https://control.sparkedhost.us'
-          server-id: ${{ secrets.APOLLO_SERVER_ID }}
-          bearer-token: ${{ secrets.APOLLO_API_KEY }}
-          power-action: 'restart'

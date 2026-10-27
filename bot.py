@@ -36,6 +36,7 @@ intents.message_content = True
 bot = discord.Bot(intents=intents)
 bot.load_extension('cogs.music')
 bot.load_extension('cogs.landmark')
+bot.load_extension('cogs.role')
 
 queue = wavelink.Queue()
 

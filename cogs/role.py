@@ -1,13 +1,5 @@
 import discord
-import json
-
-def get_self_assignable_roles(guild_id: str):
-    try:
-        with open("data/roles.json", "r") as file:
-            data = json.load(file)
-            return data[str(guild_id)]
-    except Exception as ex:
-        print(f'Error opening roles file: ${ex.with_traceback}')
+from lib.odoo.cache import get_self_assignable_roles, invalidate_roles
 
 class RoleSelect(discord.ui.Select):
     def __init__(self, roles, mode):
@@ -62,15 +54,45 @@ class Role(discord.Cog):
 
     roles = discord.SlashCommandGroup(name="roles", description="Commands for assigning and removing roles")
 
+    async def send_role_select(self, ctx: discord.ApplicationContext, mode: str, prompt: str):
+        # the Odoo lookup can take longer than Discord's 3 second response window
+        await ctx.defer(ephemeral=True)
+        try:
+            roles = await get_self_assignable_roles(ctx.interaction.guild_id)
+        except Exception:
+            await ctx.respond("Couldn't load the role list right now, try again in a bit.", ephemeral=True)
+            return
+
+        if not roles:
+            await ctx.respond("There are no self assignable roles in this server.", ephemeral=True)
+            return
+
+        await ctx.respond(prompt, view=RoleView(roles, mode), ephemeral=True)
+
     @roles.command(name="get")
     async def get(self, ctx: discord.ApplicationContext):
-        roles = get_self_assignable_roles(ctx.interaction.guild_id)
-        await ctx.respond("Select all the roles you'd like from the dropdown!", view=RoleView(roles, 'get'), ephemeral=True)
+        await self.send_role_select(ctx, 'get', "Select all the roles you'd like from the dropdown!")
 
     @roles.command(name="drop")
-    async def get(self, ctx: discord.ApplicationContext):
-        roles = get_self_assignable_roles(ctx.interaction.guild_id)
-        await ctx.respond("Select all the roles you'd like remove from yourself", view=RoleView(roles, 'drop'), ephemeral=True)
+    async def drop(self, ctx: discord.ApplicationContext):
+        await self.send_role_select(ctx, 'drop', "Select all the roles you'd like remove from yourself")
+
+    @roles.command(name="refresh", description="Reload the self assignable role list from Odoo")
+    async def refresh(self, ctx: discord.ApplicationContext):
+        if not ctx.author.guild_permissions.manage_roles:
+            await ctx.respond("You need the Manage Roles permission to do that.", ephemeral=True)
+            return
+
+        invalidate_roles(ctx.interaction.guild_id)
+        await ctx.respond("Role list will be reloaded from Odoo on the next use.", ephemeral=True)
+
+    @discord.Cog.listener()
+    async def on_guild_role_update(self, before: discord.Role, after: discord.Role):
+        invalidate_roles(after.guild.id)
+
+    @discord.Cog.listener()
+    async def on_guild_role_delete(self, role: discord.Role):
+        invalidate_roles(role.guild.id)
 
 def setup(bot):
     bot.add_cog(Role(bot))

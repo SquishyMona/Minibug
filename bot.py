@@ -14,6 +14,7 @@ import wavelink
 import asyncio
 from dotenv import load_dotenv
 from openrouter import OpenRouter
+from lib.webhook.client import start_webhook_server
 
 load_dotenv('./.env')
 
@@ -59,6 +60,7 @@ async def get_message_context(message: discord.Message) -> list[dict[str, str]]:
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     await connect_nodes()
+    await start_webhook_server()
 
 @bot.event
 async def on_wavelink_node_ready(node: wavelink.Node):

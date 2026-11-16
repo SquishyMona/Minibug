@@ -1,12 +1,12 @@
 from aiohttp import web
 import os
-from cogs.role import invalidate_roles
+from lib.odoo.cache import invalidate_roles
 
 async def handle_roles_changed(request: web.Request):
     if request.headers.get("Authorization") != f"Bearer {os.getenv('WEBHOOK_SECRET')}":
         return web.Response(status=401)
     data = await request.json()
-    invalidate_roles(data.get("guild_id"))   # None clears every guild
+    invalidate_roles(data.get("guild_id")) 
     return web.Response(status=204)
 
 async def start_webhook_server():
